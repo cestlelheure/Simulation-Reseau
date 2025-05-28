@@ -181,11 +181,12 @@ int charger_configuration(const char *nom_fichier, graphe *g) {
     
     // Affichage des informations de la configuration chargée
     printf("Configuration réseau chargée avec succès:\n");
+    printf("\n=================== En-tête ==================\n");
     printf("- %d équipements (%d switchs, %d stations)\n", nombre_equipements, nb_switchs, nb_stations);
     printf("- %zu liens\n", nb_aretes(g));
     
     // Afficher les switchs
-    printf("\nSwitchs:\n");
+    printf("\n\n==================== Switchs ==================\n");
     for (int i = 0; i < nb_switchs; i++) {
         printf("Switch %d - MAC: %02X:%02X:%02X:%02X:%02X:%02X | Ports: %d | Priorité: %d\n", 
                i,
@@ -195,7 +196,7 @@ int charger_configuration(const char *nom_fichier, graphe *g) {
     }
     
     // Afficher les stations
-    printf("\nStations:\n");
+    printf("\n\n==================== Stations ==================\n");
     for (int i = 0; i < nb_stations; i++) {
         printf("Station %d - MAC: %02X:%02X:%02X:%02X:%02X:%02X | IP: %d.%d.%d.%d\n", 
                i,
