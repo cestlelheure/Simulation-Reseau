@@ -6,6 +6,7 @@
 #include "trame.h"
 #include "station.h"
 #include "switch.h"
+#include "configuration.h"
 
 // Fonctions utilitaires pour les tests
 void test_separator(const char* test_name) {
@@ -162,6 +163,58 @@ void test_capacite_graphe() {
     deinit_graphe(&g);
 }
 
+void test_configuration() {
+    test_separator("Chargement de configuration réseau");
+        
+    graphe g;
+    
+    // Test 1: Chargement d'un fichier valide
+    printf("Test 1: Chargement du fichier de configuration valide\n");
+    int result = charger_configuration("test_config.txt", &g);
+    printf("Résultat du chargement: %s\n", result ? "Succès" : "Échec");
+    
+    if (result) {
+        printf("Vérification de la structure du graphe:\n");
+        printf("  - Nombre de sommets: %zu\n", ordre(&g));
+        printf("  - Nombre d'arêtes: %zu\n", nb_aretes(&g));
+        
+        // Vérifier quelques connexions
+        arete test_aretes[] = {{0, 1}, {1, 2}, {1, 3}, {3, 4}};
+        printf("  - Vérification des connexions:\n");
+        for (int i = 0; i < 4; i++) {
+            bool exists = existe_arete(&g, test_aretes[i]);
+            printf("    Arête (%zu,%zu): %s\n", 
+                   test_aretes[i].s1, test_aretes[i].s2, 
+                   exists ? "Présente" : "Absente");
+        }
+        
+        deinit_graphe(&g);
+    }
+    
+    // Test 2: Tentative de chargement d'un fichier inexistant
+    printf("\nTest 2: Chargement d'un fichier inexistant\n");
+    result = charger_configuration("fichier_inexistant.txt", &g);
+    printf("Résultat du chargement: %s\n", result ? "Succès" : "Échec (attendu)");
+    
+    // Test 3: Fichier avec format incorrect
+    printf("\nTest 3: Création et test d'un fichier avec format incorrect\n");
+    FILE *f = fopen("test_config_invalid.txt", "w");
+    if (f) {
+        fprintf(f, "format incorrect\n");
+        fprintf(f, "1;MAC invalide;IP invalide\n");
+        fclose(f);
+        
+        result = charger_configuration("test_config_invalid.txt", &g);
+        printf("Résultat du chargement: %s\n", result ? "Succès" : "Échec (attendu)");
+    }
+    
+    // Nettoyage des fichiers de test
+    printf("\nNettoyage des fichiers de test...\n");
+    remove("test_config.txt");
+    remove("test_config_invalid.txt");
+    printf("Fichiers de test supprimés\n");
+}
+
 int main() {
     printf("=== Programme de test des fonctions implémentées ===\n");
     
@@ -169,6 +222,7 @@ int main() {
     test_graphe();
     test_trame();
     test_capacite_graphe();
+    test_configuration();
     
     printf("\n=== Fin des tests ===\n");
     return 0;
