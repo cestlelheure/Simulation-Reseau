@@ -20,6 +20,8 @@ typedef struct graphe
     size_t nb_aretes;
 } graphe;
 
+static const size_t UNKNOWN_INDEX = -1;
+
 void init_graphe(graphe *g);
 void deinit_graphe(graphe *g);
 
