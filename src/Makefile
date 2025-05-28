@@ -5,8 +5,8 @@ all: main
 adresse.o: adresse.c adresse.h
 	gcc -c $(FLAGS) adresse.c
 
-graph.o: graph.c graph.h
-	gcc -c $(FLAGS) graph.c
+graphe.o: graphe.c graphe.h
+	gcc -c $(FLAGS) graphe.c
 
 station.o: station.c station.h
 	gcc -c $(FLAGS) station.c
@@ -23,8 +23,8 @@ configuration.o: configuration.c configuration.h
 main.o: main.c
 	gcc -c $(FLAGS) main.c
 
-main: main.o adresse.o trame.o graph.o station.o switch.o configuration.o
-	gcc $(FLAGS) -o main main.o adresse.o trame.o graph.o station.o switch.o configuration.o
+main: main.o adresse.o trame.o graphe.o station.o switch.o configuration.o
+	gcc $(FLAGS) -o main main.o adresse.o trame.o graphe.o station.o switch.o configuration.o
 
 
 clean:
