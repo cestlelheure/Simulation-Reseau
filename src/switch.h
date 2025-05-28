@@ -1,16 +1,23 @@
-#pragma once
+#include "adresse.h"
 
-#include <stdlib.h>
-#include <stdbool.h>
-#include <adresse.h>
+typedef struct {
+    mac_addr_t mac;
+    int port;
+} table_entree_t;
 
-typedef char string[256];
+typedef struct {
+    table_entree_t* entrees;
+    int taille;
+} table_commutation_t;
 
-typedef struct Nintendo{
-    MAC adresse_mac;
-    STP jetensuppliepitie;
-}Nintendo;
+typedef struct {
+    mac_addr_t mac;
+    int nb_ports;
+    int priorite;
+    table_commutation_t table;
+} switch_t;
 
-static const size_t UNKNOWN_INDEX = -1;
+void afficher_switch(switch_t s);
+void afficher_table(table_commutation_t table);
 
-//fonctions
+#endif

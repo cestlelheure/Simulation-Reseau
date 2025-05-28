@@ -1,20 +1,11 @@
-#pragma once
+#include "adresse.h"
 
-#include <stdlib.h>
-#include <stdbool.h>
-#include <adresse.h>
+// Structure représentant une station du réseau
+typedef struct {
+    mac_addr_t mac;
+    ip_addr_t ip;
+} station_t;
 
-typedef char string[256];
+// Fonction d'affichage
+void afficher_station(station_t s);
 
-typedef struct station{
-    string nom;
-    IPv4 adresse_ip;
-    MAC adresse_mac;
-    IPv4 masque;
-    IPv4 passerelle;
-}station;
-
-static const size_t UNKNOWN_INDEX = -1;
-
-//fonctions
-init_Station(station *pc);
