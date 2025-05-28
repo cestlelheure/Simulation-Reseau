@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
+#include "adresse.h" // Include for UNKNOWN_INDEX
 
 typedef size_t sommet;
 
@@ -18,8 +19,6 @@ typedef struct graphe
     size_t aretes_capacite;
     size_t nb_aretes;
 } graphe;
-
-static const size_t UNKNOWN_INDEX = -1;
 
 void init_graphe(graphe *g);
 void deinit_graphe(graphe *g);

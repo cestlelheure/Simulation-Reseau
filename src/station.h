@@ -2,8 +2,8 @@
 
 // Structure représentant une station du réseau
 typedef struct {
-    mac_addr_t mac;
-    ip_addr_t ip;
+    MAC mac;
+    IPv4 ip;
 } station_t;
 
 // Fonction d'affichage

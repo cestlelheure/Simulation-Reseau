@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include "adresse.h"
 
-typedef struct trame {
+typedef struct {
     uint8_t preambule[7];
     uint8_t sfd;
     MAC destination;
