@@ -1,3 +1,7 @@
+#include "adresse.h"
+#include <stdio.h>
+
+
 void initIPv4(IPv4 *adresse){
     //à completer
 }
