@@ -85,8 +85,8 @@ int charger_configuration(const char *nom_fichier, graphe *g) {
                 }
                 // Conversion de la chaîne en adresse MAC
                 sscanf(token, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", 
-                       &mac.MAC[0], &mac.MAC[1], &mac.MAC[2], 
-                       &mac.MAC[3], &mac.MAC[4], &mac.MAC[5]);
+                       &mac.octet[0], &mac.octet[1], &mac.octet[2], 
+                       &mac.octet[3], &mac.octet[4], &mac.octet[5]);
                 
                 // Lecture du nombre de ports
                 token = strtok(NULL, ";");
@@ -125,8 +125,8 @@ int charger_configuration(const char *nom_fichier, graphe *g) {
                 }
                 // Conversion de la chaîne en adresse MAC
                 sscanf(token, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", 
-                       &mac.MAC[0], &mac.MAC[1], &mac.MAC[2], 
-                       &mac.MAC[3], &mac.MAC[4], &mac.MAC[5]);
+                       &mac.octet[0], &mac.octet[1], &mac.octet[2], 
+                       &mac.octet[3], &mac.octet[4], &mac.octet[5]);
                 
                 // Lecture de l'adresse IP
                 token = strtok(NULL, ";");
@@ -136,7 +136,7 @@ int charger_configuration(const char *nom_fichier, graphe *g) {
                 }
                 // Conversion de la chaîne en adresse IP
                 sscanf(token, "%hhu.%hhu.%hhu.%hhu", 
-                       &ip.IP[0], &ip.IP[1], &ip.IP[2], &ip.IP[3]);
+                       &ip.octet[0], &ip.octet[1], &ip.octet[2], &ip.octet[3]);
                 
                 // Initialisation de la station
                 stations[nb_stations].mac = mac;
@@ -189,8 +189,8 @@ int charger_configuration(const char *nom_fichier, graphe *g) {
     for (int i = 0; i < nb_switchs; i++) {
         printf("Switch %d - MAC: %02X:%02X:%02X:%02X:%02X:%02X | Ports: %d | Priorité: %d\n", 
                i,
-               switchs[i].mac.MAC[0], switchs[i].mac.MAC[1], switchs[i].mac.MAC[2],
-               switchs[i].mac.MAC[3], switchs[i].mac.MAC[4], switchs[i].mac.MAC[5],
+               switchs[i].mac.octet[0], switchs[i].mac.octet[1], switchs[i].mac.octet[2],
+               switchs[i].mac.octet[3], switchs[i].mac.octet[4], switchs[i].mac.octet[5],
                switchs[i].nb_ports, switchs[i].priorite);
     }
     
@@ -199,10 +199,10 @@ int charger_configuration(const char *nom_fichier, graphe *g) {
     for (int i = 0; i < nb_stations; i++) {
         printf("Station %d - MAC: %02X:%02X:%02X:%02X:%02X:%02X | IP: %d.%d.%d.%d\n", 
                i,
-               stations[i].mac.MAC[0], stations[i].mac.MAC[1], stations[i].mac.MAC[2],
-               stations[i].mac.MAC[3], stations[i].mac.MAC[4], stations[i].mac.MAC[5],
-               stations[i].ip.IP[0], stations[i].ip.IP[1], 
-               stations[i].ip.IP[2], stations[i].ip.IP[3]);
+               stations[i].mac.octet[0], stations[i].mac.octet[1], stations[i].mac.octet[2],
+               stations[i].mac.octet[3], stations[i].mac.octet[4], stations[i].mac.octet[5],
+               stations[i].ip.octet[0], stations[i].ip.octet[1], 
+               stations[i].ip.octet[2], stations[i].ip.octet[3]);
     }
     
     // Libérer la mémoire
