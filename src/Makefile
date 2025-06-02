@@ -20,11 +20,14 @@ trame.o: trame.c trame.h
 configuration.o: configuration.c configuration.h
 	gcc -c $(FLAGS) configuration.c
 
+stp.o: stp.c stp.h
+	gcc -c $(FLAGS) stp.c
+
 main.o: main.c
 	gcc -c $(FLAGS) main.c
 
-main: main.o adresse.o trame.o graphe.o station.o switch.o configuration.o
-	gcc $(FLAGS) -o main main.o adresse.o trame.o graphe.o station.o switch.o configuration.o
+main: main.o adresse.o trame.o graphe.o station.o switch.o configuration.o stp.o
+	gcc $(FLAGS) -o main main.o adresse.o trame.o graphe.o station.o switch.o configuration.o stp.o
 
 
 clean:
