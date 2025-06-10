@@ -1,4 +1,4 @@
-*.log
-*.txt
-*.o
-main
+src/*.log
+src/*.txt
+src/*.o
+src/main
