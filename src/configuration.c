@@ -44,7 +44,7 @@ int charger_configuration(const char *nom_fichier, graphe *g) {
     
     char *ligne = NULL;
     size_t taille_ligne = 0;
-    ssize_t longueur;
+    size_t longueur;
     int nombre_equipements, nombre_liens;
     
     // Lecture de la ligne d'en-tête (nb_equipements nb_liens)
@@ -258,7 +258,7 @@ int charger_configuration_complete(const char *nom_fichier, configuration_reseau
     
     char *ligne = NULL;
     size_t taille_ligne = 0;
-    ssize_t longueur;
+    size_t longueur;
     int nombre_equipements, nombre_liens;
     
     // Lecture de la ligne d'en-tête
