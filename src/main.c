@@ -21,6 +21,19 @@
 #include "adresse.h"
 #include "trame.h"
 #include "station.h"
+#include "configuration.h"
+
+/**
+* Affiche la configuration réseau à partir d'un format txt
+*/
+void test_configuration() {
+
+    graphe g;
+    init_graphe(&g);
+    int result = charger_configuration("test_config.txt", &g);
+    printf("  Résultat du chargement: %s\n", result ? "Succès" : "Échec");
+    deinit_graphe(&g);
+}
 
 /**
  * Structure pour simuler des stations connectées aux switches
@@ -213,16 +226,16 @@ void simuler_envoi_trame(switch_t switches[], int nb_switches, graphe *g,
     
     // Vérifier l'état du port d'entrée
     if (get_port_state(&switches[switch_entree], port_entree) != PORT_FORWARDING) {
-        printf("❌ Port %d du switch %d n'est pas en état FORWARDING\n", 
+        printf("Port %d du switch %d n'est pas en état FORWARDING\n", 
                port_entree, switch_entree);
-        printf("   État actuel: %s\n", 
+        printf("État actuel: %s\n", 
                port_state_to_string(get_port_state(&switches[switch_entree], port_entree)));
         deinit_trame(&t);
         return;
     }
     
     // Apprentissage de l'adresse source
-    printf("📚 Apprentissage: ");
+    printf("Apprentissage: ");
     char src_str[18];
     MAC_to_string(src_mac, src_str);
     printf("%s -> Port %d\n", src_str, port_entree);
@@ -235,47 +248,47 @@ void simuler_envoi_trame(switch_t switches[], int nb_switches, graphe *g,
     MAC_to_string(dst_mac, dst_str);
     
     if (est_broadcast(dst_mac)) {
-        printf("📢 Adresse broadcast détectée\n");
-        printf("🔄 Flood sur tous les ports actifs sauf port d'entrée %d:\n", port_entree);
+        printf("Adresse broadcast détectée\n");
+        printf("Flood sur tous les ports actifs sauf port d'entrée %d:\n", port_entree);
         
         for (int p = 0; p < switches[switch_entree].nb_ports; p++) {
             if (p != port_entree && 
                 get_port_state(&switches[switch_entree], p) == PORT_FORWARDING &&
                 port_est_actif(&switches[switch_entree], p)) {
-                printf("   ✅ Port %d: %s\n", p, 
+                printf("   Port %d: %s\n", p, 
                        port_role_to_string(get_port_role(&switches[switch_entree], p)));
             } else if (p != port_entree) {
-                printf("   ❌ Port %d: %s (%s)\n", p,
+                printf("   Port %d: %s (%s)\n", p,
                        port_role_to_string(get_port_role(&switches[switch_entree], p)),
                        port_state_to_string(get_port_state(&switches[switch_entree], p)));
             }
         }
     } else if (port_destination == -1) {
-        printf("❓ Adresse destination %s inconnue\n", dst_str);
-        printf("🔄 Flood sur tous les ports actifs sauf port d'entrée %d:\n", port_entree);
+        printf("Adresse destination %s inconnue\n", dst_str);
+        printf("Flood sur tous les ports actifs sauf port d'entrée %d:\n", port_entree);
         
         for (int p = 0; p < switches[switch_entree].nb_ports; p++) {
             if (p != port_entree && 
                 get_port_state(&switches[switch_entree], p) == PORT_FORWARDING &&
                 port_est_actif(&switches[switch_entree], p)) {
-                printf("   ✅ Port %d: %s\n", p,
+                printf("   Port %d: %s\n", p,
                        port_role_to_string(get_port_role(&switches[switch_entree], p)));
             } else if (p != port_entree) {
-                printf("   ❌ Port %d: %s (%s)\n", p,
+                printf("   Port %d: %s (%s)\n", p,
                        port_role_to_string(get_port_role(&switches[switch_entree], p)),
                        port_state_to_string(get_port_state(&switches[switch_entree], p)));
             }
         }
     } else if (port_destination == port_entree) {
-        printf("🔄 Port de destination = port d'entrée (%d), trame ignorée\n", port_entree);
+        printf("Port de destination = port d'entrée (%d), trame ignorée\n", port_entree);
     } else {
-        printf("🎯 Destination trouvée: %s -> Port %d\n", dst_str, port_destination);
+        printf("Destination trouvée: %s -> Port %d\n", dst_str, port_destination);
         if (get_port_state(&switches[switch_entree], port_destination) == PORT_FORWARDING &&
             port_est_actif(&switches[switch_entree], port_destination)) {
-            printf("✅ Envoi direct sur port %d (%s)\n", port_destination,
+            printf("Envoi direct sur port %d (%s)\n", port_destination,
                    port_role_to_string(get_port_role(&switches[switch_entree], port_destination)));
         } else {
-            printf("❌ Port %d non disponible (%s, %s)\n", port_destination,
+            printf(" Port %d non disponible (%s, %s)\n", port_destination,
                    port_role_to_string(get_port_role(&switches[switch_entree], port_destination)),
                    port_state_to_string(get_port_state(&switches[switch_entree], port_destination)));
         }
@@ -288,15 +301,20 @@ void simuler_envoi_trame(switch_t switches[], int nb_switches, graphe *g,
  * Fonction principale du programme
  * 
  * Cette fonction :
- * 1. Crée une topologie de test
- * 2. Initialise les switches et stations
- * 3. Exécute le protocole STP
- * 4. Affiche l'état du réseau
- * 5. Simule l'envoi de trames
+ * 1. Teste la configuration
+ * 2. Crée une topologie de test
+ * 3. Initialise les switches et stations
+ * 4. Exécute le protocole STP
+ * 5. Affiche l'état du réseau
+ * 6. Simule l'envoi de trames 
  * 
  * Retourne 0 en cas de succès, 1 en cas d'erreur
  */
 int main() {
+    test_configuration();
+
+    printf("\n\n\n");
+
     printf("╔════════════════════════════════════════════════════════════════╗\n");
     printf("║              SIMULATION DE RÉSEAU AVEC STP                     ║\n");
     printf("╚════════════════════════════════════════════════════════════════╝\n\n");
@@ -319,8 +337,8 @@ int main() {
         init_stp(&stp_switches[i], &switches[i]);
     }
     
-    printf("🏗️  Topologie créée: Triangle de 3 switches\n");
-    printf("📊 Calcul du Spanning Tree Protocol...\n\n");
+    printf("Topologie créée: Triangle de 3 switches\n");
+    printf("Calcul du Spanning Tree Protocol...\n\n");
     
     // Calculer le STP
     calculer_stp_simple(stp_switches, NB_SWITCHES, g);
@@ -340,7 +358,7 @@ int main() {
     for (int i = 0; i < NB_STATIONS; i++) {
         char mac_str[18];
         MAC_to_string(stations[i].station.mac, mac_str);
-        printf("🖥️  %s (%s) -> Switch %d, Port %d\n", 
+        printf("%s (%s) -> Switch %d, Port %d\n", 
                stations[i].nom, mac_str, stations[i].switch_id, stations[i].port_connecte);
     }
     
@@ -352,14 +370,14 @@ int main() {
     // Test 1: Station A envoie à Station B
     printf("\n🧪 TEST 1: Station_A -> Station_B\n");
     simuler_envoi_trame(switches, NB_SWITCHES, g,
-                       stations[0].station.mac, stations[1].station.mac, "Hello Station B!",
+                       stations[0].station.mac, stations[1].station.mac, "Coucou Station B!",
                        stations[0].switch_id, stations[0].port_connecte);
     
     // Test 2: Broadcast depuis Station C
     printf("\n🧪 TEST 2: Station_C -> Broadcast\n");
     MAC broadcast = creer_mac(0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF);
     simuler_envoi_trame(switches, NB_SWITCHES, g,
-                       stations[2].station.mac, broadcast, "Broadcast message!",
+                       stations[2].station.mac, broadcast, "Broadcast !",
                        stations[2].switch_id, stations[2].port_connecte);
     
     // Afficher l'état final des tables
@@ -376,6 +394,6 @@ int main() {
     deinit_graphe(g);
     free(g);
     
-    printf("\n✅ Simulation terminée avec succès!\n");
+    printf("\nSimulation terminée avec succès!\n");
     return 0;
 }
