@@ -40,7 +40,8 @@ void afficher_trame(const trame *t){
         return;
     }
     char str_mac[18];
-    printf("Trame: %s\n", t->donnees);
+    printf("Trame:\n");
+    printf("Message: %.*s\n", (int)t->taille_donnees, t->donnees);
     MAC_to_string(t->source, str_mac);
     printf("Source: %s\n", str_mac);
     MAC_to_string(t->destination, str_mac);
