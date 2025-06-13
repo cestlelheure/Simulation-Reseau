@@ -90,15 +90,29 @@ void afficher_topologie(configuration_reseau_t *config) {
     for (size_t i = 0; i < config->g->ordre; i++) {
         printf("Nœud %zu connecté à: ", i);
         bool first = true;
-        for (size_t j = 0; j < config->g->ordre; j++) {
-            if (sommets_adjacents(config->g, i, j)) {
-                if (!first) printf(", ");
-                printf("%zu", j);
-                first = false;
-            }
+        
+        // Allouer un tableau pour stocker les sommets adjacents
+        sommet *sommets_adj = malloc(config->g->ordre * sizeof(sommet));
+        if (sommets_adj == NULL) {
+            printf("Erreur d'allocation mémoire\n");
+            continue;
         }
+        
+        // Obtenir les sommets adjacents
+        size_t nb_adj = sommets_adjacents(config->g, i, sommets_adj);
+        
+        // Afficher les sommets adjacents
+        for (size_t j = 0; j < nb_adj; j++) {
+            if (!first) printf(", ");
+            printf("%zu", sommets_adj[j]);
+            first = false;
+        }
+        
         if (first) printf("aucun");
         printf("\n");
+        
+        // Libérer la mémoire
+        free(sommets_adj);
     }
 }
 
@@ -115,12 +129,12 @@ void simuler_envoi_trame(configuration_reseau_t *config,
     
     // Vérifier la validité des paramètres
     if (switch_entree < 0 || switch_entree >= config->nb_switches) {
-        printf("❌ Switch d'entrée invalide: %d (max: %d)\n", switch_entree, config->nb_switches - 1);
+        printf("Switch d'entrée invalide: %d (max: %d)\n", switch_entree, config->nb_switches - 1);
         return;
     }
     
     if (port_entree < 0 || port_entree >= config->switches[switch_entree].nb_ports) {
-        printf("❌ Port d'entrée invalide: %d (max: %d)\n", 
+        printf("Port d'entrée invalide: %d (max: %d)\n", 
                port_entree, config->switches[switch_entree].nb_ports - 1);
         return;
     }
@@ -129,22 +143,22 @@ void simuler_envoi_trame(configuration_reseau_t *config,
     trame t;
     uint8_t *data = (uint8_t*)message;
     if (!init_trame(&t, src_mac, dst_mac, TYPE_IPV4, data, strlen(message))) {
-        printf("❌ Erreur lors de la création de la trame\n");
+        printf("Erreur lors de la création de la trame\n");
         return;
     }
     
     t.fcs = calculer_fcs(&t);
     
-    printf("📦 Trame créée:\n");
+    printf("Trame créée:\n");
     afficher_trame(&t);
     printf("\n");
     
     // Traitement par le switch d'entrée
-    printf("🔄 Traitement par Switch %d (Port %d)\n", switch_entree, port_entree);
+    printf("Traitement par Switch %d (Port %d)\n", switch_entree, port_entree);
     
     // Vérifier l'état du port d'entrée
     if (get_port_state(&config->switches[switch_entree], port_entree) != PORT_FORWARDING) {
-        printf("⚠️  Port %d du switch %d n'est pas en état FORWARDING\n", 
+        printf("Port %d du switch %d n'est pas en état FORWARDING\n", 
                port_entree, switch_entree);
         printf("   État actuel: %s\n", 
                port_state_to_string(get_port_state(&config->switches[switch_entree], port_entree)));
@@ -153,7 +167,7 @@ void simuler_envoi_trame(configuration_reseau_t *config,
     }
     
     // Apprentissage de l'adresse source
-    printf("📚 Apprentissage: ");
+    printf("Apprentissage: ");
     char src_str[18];
     MAC_to_string(src_mac, src_str);
     printf("%s -> Port %d\n", src_str, port_entree);
@@ -166,58 +180,58 @@ void simuler_envoi_trame(configuration_reseau_t *config,
     MAC_to_string(dst_mac, dst_str);
     
     if (est_broadcast(dst_mac)) {
-        printf("📡 Adresse broadcast détectée\n");
-        printf("🌊 Flood sur tous les ports actifs (sauf port d'entrée %d):\n", port_entree);
+        printf("Adresse broadcast détectée\n");
+        printf("Flood sur tous les ports actifs (sauf port d'entrée %d):\n", port_entree);
         
         int ports_utilises = 0;
         for (int p = 0; p < config->switches[switch_entree].nb_ports; p++) {
             if (p != port_entree) {
                 if (get_port_state(&config->switches[switch_entree], p) == PORT_FORWARDING &&
                     port_est_actif(&config->switches[switch_entree], p)) {
-                    printf("   ✅ Port %d: %s\n", p, 
+                    printf("   Port %d: %s\n", p, 
                            port_role_to_string(get_port_role(&config->switches[switch_entree], p)));
                     ports_utilises++;
                 } else {
-                    printf("   ❌ Port %d: %s (%s)\n", p,
+                    printf("   Port %d: %s (%s)\n", p,
                            port_role_to_string(get_port_role(&config->switches[switch_entree], p)),
                            port_state_to_string(get_port_state(&config->switches[switch_entree], p)));
                 }
             }
         }
-        printf("   📊 Total ports utilisés: %d\n", ports_utilises);
+        printf("   Total ports utilisés: %d\n", ports_utilises);
         
     } else if (port_destination == -1) {
-        printf("❓ Adresse destination %s inconnue\n", dst_str);
-        printf("🌊 Flood sur tous les ports actifs (sauf port d'entrée %d):\n", port_entree);
+        printf("Adresse destination %s inconnue\n", dst_str);
+        printf("Flood sur tous les ports actifs (sauf port d'entrée %d):\n", port_entree);
         
         int ports_utilises = 0;
         for (int p = 0; p < config->switches[switch_entree].nb_ports; p++) {
             if (p != port_entree) {
                 if (get_port_state(&config->switches[switch_entree], p) == PORT_FORWARDING &&
                     port_est_actif(&config->switches[switch_entree], p)) {
-                    printf("   ✅ Port %d: %s\n", p,
+                    printf("   Port %d: %s\n", p,
                            port_role_to_string(get_port_role(&config->switches[switch_entree], p)));
                     ports_utilises++;
                 } else {
-                    printf("   ❌ Port %d: %s (%s)\n", p,
+                    printf("   Port %d: %s (%s)\n", p,
                            port_role_to_string(get_port_role(&config->switches[switch_entree], p)),
                            port_state_to_string(get_port_state(&config->switches[switch_entree], p)));
                 }
             }
         }
-        printf("   📊 Total ports utilisés: %d\n", ports_utilises);
+        printf("   Total ports utilisés: %d\n", ports_utilises);
         
     } else if (port_destination == port_entree) {
-        printf("🔄 Port de destination = port d'entrée (%d), trame ignorée\n", port_entree);
+        printf("Port de destination = port d'entrée (%d), trame ignorée\n", port_entree);
         
     } else {
-        printf("🎯 Destination trouvée: %s -> Port %d\n", dst_str, port_destination);
+        printf("Destination trouvée: %s -> Port %d\n", dst_str, port_destination);
         if (get_port_state(&config->switches[switch_entree], port_destination) == PORT_FORWARDING &&
             port_est_actif(&config->switches[switch_entree], port_destination)) {
-            printf("✅ Envoi direct sur port %d (%s)\n", port_destination,
+            printf("Envoi direct sur port %d (%s)\n", port_destination,
                    port_role_to_string(get_port_role(&config->switches[switch_entree], port_destination)));
         } else {
-            printf("❌ Port %d non disponible (%s, %s)\n", port_destination,
+            printf("Port %d non disponible (%s, %s)\n", port_destination,
                    port_role_to_string(get_port_role(&config->switches[switch_entree], port_destination)),
                    port_state_to_string(get_port_state(&config->switches[switch_entree], port_destination)));
         }
@@ -289,9 +303,9 @@ int main(int argc, char *argv[]) {
     const char *fichier_config = "test_config.txt";
     if (argc > 1) {
         fichier_config = argv[1];
-        printf("📁 Utilisation du fichier de configuration: %s\n", fichier_config);
+        printf("Utilisation du fichier de configuration: %s\n", fichier_config);
     } else {
-        printf("📁 Utilisation du fichier par défaut: %s\n", fichier_config);
+        printf("Utilisation du fichier par défaut: %s\n", fichier_config);
         printf("   (Utilisez: %s <fichier_config> pour spécifier un autre fichier)\n\n", argv[0]);
     }
     
@@ -299,28 +313,28 @@ int main(int argc, char *argv[]) {
     configuration_reseau_t config = {0};
     
     // Charger la configuration complète depuis le fichier
-    printf("🔄 Chargement de la configuration réseau...\n");
+    printf("Chargement de la configuration réseau...\n");
     if (!charger_configuration_complete(fichier_config, &config)) {
-        printf("❌ Erreur lors du chargement de la configuration depuis %s\n", fichier_config);
+        printf("Erreur lors du chargement de la configuration depuis %s\n", fichier_config);
         printf("   Vérifiez que le fichier existe et respecte le bon format.\n");
         return 1;
     }
     
-    printf("✅ Configuration chargée avec succès !\n\n");
+    printf("Configuration chargée avec succès !\n\n");
     
     // Afficher un résumé de la configuration
     printf("═══ RÉSUMÉ DE LA CONFIGURATION ═══\n");
-    printf("🖥️  Switches: %d\n", config.nb_switches);
-    printf("💻 Stations: %d\n", config.nb_stations);
-    printf("🔗 Liens: %zu\n", nb_aretes(config.g));
-    printf("📊 Nœuds dans le graphe: %zu\n", config.g->ordre);
+    printf("Switches: %d\n", config.nb_switches);
+    printf("Stations: %d\n", config.nb_stations);
+    printf("Liens: %zu\n", nb_aretes(config.g));
+    printf("Nœuds dans le graphe: %zu\n", config.g->ordre);
     
     // Afficher les équipements détaillés
     printf("\n═══ SWITCHES CONFIGURÉS ═══\n");
     for (int i = 0; i < config.nb_switches; i++) {
         char mac_str[18];
         MAC_to_string(config.switches[i].mac, mac_str);
-        printf("🔄 Switch %d: %s\n", i, mac_str);
+        printf("Switch %d: %s\n", i, mac_str);
         printf("   - Priorité: %d\n", config.switches[i].priorite);
         printf("   - Ports: %d\n", config.switches[i].nb_ports);
         
@@ -336,7 +350,7 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < config.nb_stations; i++) {
         char mac_str[18];
         MAC_to_string(config.stations[i].mac, mac_str);
-        printf("💻 Station %d: %s\n", i, mac_str);
+        printf("Station %d: %s\n", i, mac_str);
         printf("   - IP: %d.%d.%d.%d\n",
                config.stations[i].ip.octet[0], config.stations[i].ip.octet[1],
                config.stations[i].ip.octet[2], config.stations[i].ip.octet[3]);
@@ -347,11 +361,11 @@ int main(int argc, char *argv[]) {
     
     // Vérification de cohérence
     if (config.nb_switches == 0) {
-        printf("⚠️  Attention: Aucun switch configuré, simulation limitée.\n");
+        printf("Attention: Aucun switch configuré, simulation limitée.\n");
     }
     
     if (config.nb_stations == 0) {
-        printf("⚠️  Attention: Aucune station configurée, pas de tests de communication possibles.\n");
+        printf("Attention: Aucune station configurée, pas de tests de communication possibles.\n");
     }
     
     // Initialiser les structures STP si on a des switches
@@ -359,12 +373,12 @@ int main(int argc, char *argv[]) {
     if (config.nb_switches > 0) {
         stp_switches = malloc(config.nb_switches * sizeof(switch_stp_t));
         if (!stp_switches) {
-            printf("❌ Erreur d'allocation mémoire pour STP\n");
+            printf("Erreur d'allocation mémoire pour STP\n");
             liberer_configuration(&config);
             return 1;
         }
         
-        printf("\n🔄 Initialisation des structures STP...\n");
+        printf("\nInitialisation des structures STP...\n");
         for (int i = 0; i < config.nb_switches; i++) {
             init_stp(&stp_switches[i], &config.switches[i]);
             char mac_str[18];
@@ -372,14 +386,14 @@ int main(int argc, char *argv[]) {
             printf("   Switch %d (%s) initialisé\n", i, mac_str);
         }
         
-        printf("\n🌳 Calcul du Spanning Tree Protocol...\n");
+        printf("\nCalcul du Spanning Tree Protocol...\n");
         
         // Calculer le STP
         calculer_stp_simple(stp_switches, config.nb_switches, config.g);
         
-        printf("✅ STP calculé avec succès!\n");
+        printf("STP calculé avec succès!\n");
     } else {
-        printf("\n⚠️  Pas de switches: STP non applicable\n");
+        printf("\nPas de switches: STP non applicable\n");
     }
     
     // Afficher l'état du réseau après STP
@@ -396,21 +410,8 @@ int main(int argc, char *argv[]) {
         afficher_etat_reseau(&config);
     }
     
-    // Mode interactif optionnel
-    printf("\n╔══════════════════════════════════════════════════════════════╗\n");
-    printf("║                   MODE INTERACTIF                            ║\n");
-    printf("╚══════════════════════════════════════════════════════════════╝\n");
-    printf("Voulez-vous effectuer des tests personnalisés ? (y/N): ");
-    
-    char reponse;
-    if (scanf(" %c", &reponse) == 1 && (reponse == 'y' || reponse == 'Y')) {
-        printf("\n=== Tests personnalisés ===\n");
-        printf("TODO: Implémenter le mode interactif\n");
-        printf("(Fonctionnalité disponible dans une version future)\n");
-    }
-    
     // Nettoyage de la mémoire
-    printf("\n🧹 Nettoyage de la mémoire...\n");
+    printf("\nNettoyage de la mémoire...\n");
     if (stp_switches) {
         for (int i = 0; i < config.nb_switches; i++) {
             deinit_stp(&stp_switches[i]);
@@ -420,7 +421,7 @@ int main(int argc, char *argv[]) {
     
     liberer_configuration(&config);
     
-    printf("✅ Simulation terminée avec succès!\n");
+    printf("Simulation terminée avec succès!\n");
     printf("╔════════════════════════════════════════════════════════════════╗\n");
     printf("║                        FIN DU PROGRAMME                        ║\n");
     printf("╚════════════════════════════════════════════════════════════════╝\n");
