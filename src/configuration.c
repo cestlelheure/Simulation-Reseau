@@ -42,12 +42,16 @@ int charger_configuration(const char *nom_fichier, graphe *g) {
         return 0;
     }
     
-    char ligne[MAX_LIGNE];
+    char *ligne = NULL;
+    size_t taille_ligne = 0;
+    ssize_t longueur;
     int nombre_equipements, nombre_liens;
     
     // Lecture de la ligne d'en-tête (nb_equipements nb_liens)
-    if (fgets(ligne, MAX_LIGNE, f) == NULL || sscanf(ligne, "%d %d", &nombre_equipements, &nombre_liens) != 2) {
+    if ((longueur = getline(&ligne, &taille_ligne, f)) == -1 || 
+        sscanf(ligne, "%d %d", &nombre_equipements, &nombre_liens) != 2) {
         fprintf(stderr, "Format de la première ligne incorrect\n");
+        free(ligne);
         fclose(f);
         return 0;
     }
@@ -63,6 +67,7 @@ int charger_configuration(const char *nom_fichier, graphe *g) {
         fprintf(stderr, "Erreur d'allocation mémoire\n");
         free(switchs);
         free(stations);
+        free(ligne);
         fclose(f);
         return 0;
     }
@@ -72,10 +77,11 @@ int charger_configuration(const char *nom_fichier, graphe *g) {
     
     // Lecture des équipements
     for (int i = 0; i < nombre_equipements; i++) {
-        if (fgets(ligne, MAX_LIGNE, f) == NULL) {
+        if ((longueur = getline(&ligne, &taille_ligne, f)) == -1) {
             fprintf(stderr, "Fin de fichier inattendue\n");
             free(switchs);
             free(stations);
+            free(ligne);
             fclose(f);
             return 0;
         }
@@ -173,7 +179,7 @@ int charger_configuration(const char *nom_fichier, graphe *g) {
     
     // Lecture des liens
     for (int i = 0; i < nombre_liens; i++) {
-        if (fgets(ligne, MAX_LIGNE, f) == NULL) {
+        if ((longueur = getline(&ligne, &taille_ligne, f)) == -1) {
             fprintf(stderr, "Fin de fichier inattendue lors de la lecture des liens\n");
             break;
         }
@@ -200,6 +206,7 @@ int charger_configuration(const char *nom_fichier, graphe *g) {
             fprintf(stderr, "Impossible d'ajouter l'arête entre %d et %d\n", equipement1, equipement2);
         }
     }
+    free(ligne);
     fclose(f);
     
     // Affichage des informations de la configuration chargée
@@ -249,12 +256,16 @@ int charger_configuration_complete(const char *nom_fichier, configuration_reseau
         return 0;
     }
     
-    char ligne[256];
+    char *ligne = NULL;
+    size_t taille_ligne = 0;
+    ssize_t longueur;
     int nombre_equipements, nombre_liens;
     
     // Lecture de la ligne d'en-tête
-    if (fgets(ligne, 256, f) == NULL || sscanf(ligne, "%d %d", &nombre_equipements, &nombre_liens) != 2) {
+    if ((longueur = getline(&ligne, &taille_ligne, f)) == -1 || 
+        sscanf(ligne, "%d %d", &nombre_equipements, &nombre_liens) != 2) {
         fprintf(stderr, "Format de la première ligne incorrect\n");
+        free(ligne);
         fclose(f);
         return 0;
     }
@@ -276,6 +287,7 @@ int charger_configuration_complete(const char *nom_fichier, configuration_reseau
         free(config->switches);
         free(config->stations);
         free(config->g);
+        free(ligne);
         fclose(f);
         return 0;
     }
@@ -285,11 +297,12 @@ int charger_configuration_complete(const char *nom_fichier, configuration_reseau
     
     // Lecture des équipements
     for (int i = 0; i < nombre_equipements; i++) {
-        if (fgets(ligne, 256, f) == NULL) {
+        if ((longueur = getline(&ligne, &taille_ligne, f)) == -1) {
             fprintf(stderr, "Fin de fichier inattendue\n");
             free(config->switches);
             free(config->stations);
             free(config->g);
+            free(ligne);
             fclose(f);
             return 0;
         }
@@ -382,7 +395,7 @@ int charger_configuration_complete(const char *nom_fichier, configuration_reseau
     
     // Lecture des liens
     for (int i = 0; i < nombre_liens; i++) {
-        if (fgets(ligne, 256, f) == NULL) {
+        if ((longueur = getline(&ligne, &taille_ligne, f)) == -1) {
             fprintf(stderr, "Fin de fichier inattendue lors de la lecture des liens\n");
             break;
         }
@@ -407,6 +420,7 @@ int charger_configuration_complete(const char *nom_fichier, configuration_reseau
         }
     }
     
+    free(ligne);
     fclose(f);
     
     // Affichage de la configuration chargée

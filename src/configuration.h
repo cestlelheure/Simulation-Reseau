@@ -5,8 +5,6 @@
 #include "switch.h"
 #include "graphe.h"
 
-#define MAX_LIGNE 256
-
 /**
  * Structure pour stocker la configuration réseau chargée
  */
