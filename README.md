@@ -240,7 +240,7 @@ make clean
 ### Execution
 ```bash
 # Run the simulation with a configuration file
-./simulation config/example_network.txt
+./simulation example_network.txt
 ```
 
 ## 📝 Configuration File Format
