@@ -2,7 +2,7 @@
 
 [English version below](#english-version)
 
-## 📡 Dscription
+## 📡 Description
 
 **Simulation Réseau** est un projet de simulation d'architecture réseau local développé en langage C. Le projet implémente les protocoles Ethernet et Spanning Tree Protocol (STP) pour modéliser le fonctionnement d'un réseau local avec stations et switches.
 
